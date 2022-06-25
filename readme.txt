@@ -1,3 +1,11 @@
+Dependencies: 
+- Nodejs
+- On click blockchain
+- Truffle (Solidity)
+    npm install -g truffle
+- Metamask extension
+    https://metamask.io/extension
+
 To run this app: 
 1. npm install
 2. npm start (to run react app)
