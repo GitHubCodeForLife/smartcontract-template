@@ -3,11 +3,10 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract MyToken is ERC20, Ownable {
-    constructor() ERC20("MyToken", "MTK") {
-        // set total supply to 1 million tokens
-    }
+contract RandomToken is ERC20, Ownable {
+    constructor() ERC20("RandomToken", "RDTK") {}
 
     /*https://eth-converter.com/
     Wei = 1 
@@ -26,5 +25,11 @@ contract MyToken is ERC20, Ownable {
 
     fallback() external payable {
         _mint(msg.sender, msg.value);
+    }
+
+    function withdraw(uint256 amount) public payable onlyOwner returns (bool) {
+        require(amount <= balanceOf(msg.sender));
+        _burn(msg.sender, amount);
+        return true;
     }
 }
