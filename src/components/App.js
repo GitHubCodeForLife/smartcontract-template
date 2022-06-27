@@ -30,9 +30,11 @@ class App extends Component {
         daiTokenData.address
       );
       this.setState({ daiToken });
+
       let daiTokenBalance = await daiToken.methods
         .balanceOf(this.state.account)
         .call();
+      console.log({ daiTokenBalance });
       this.setState({ daiTokenBalance: daiTokenBalance.toString() });
     } else {
       window.alert("DaiToken contract not deployed to detected network.");
