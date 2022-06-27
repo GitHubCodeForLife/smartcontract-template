@@ -10,6 +10,9 @@ contract RandomToken {
 
     uint256 private randNonce = 0;
     uint256 randNumber;
+    uint256 number = 10;
+
+    constructor() public {}
 
     function random(uint256 min, uint256 max) public {
         // Transaction-Level PRNG
@@ -30,5 +33,13 @@ contract RandomToken {
 
     function getRandomNumber() public view returns (uint256) {
         return randNumber;
+    }
+
+    function setNumber() public {
+        number = number * 2;
+    }
+
+    function getNumber() public view returns (uint256) {
+        return number;
     }
 }

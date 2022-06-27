@@ -33,3 +33,15 @@ Global npm packages:
 - npm list -g
 - npm install -g <package>@<version>
 - npm uninstall -g <package>
+
+
+
+
+==============================
+Call Contract in React APP we need: 
+1. Contract provider 
+2. Contract ABI
+3. Contract address
+
+send methods: 
+call methods: 
