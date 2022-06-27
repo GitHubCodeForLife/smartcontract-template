@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.21 <0.6.0;
+pragma solidity >=0.4.22 <0.9.0;
 
-import "./math/SafeMath.sol";
-import "./ownership/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RandomToken {
+contract RandomContract is Ownable {
     using SafeMath for uint256;
-    string public name = "Random Token";
+    string public name = "Random";
 
     uint256 private randNonce = 0;
     uint256 randNumber;
-    uint256 number = 10;
 
-    constructor() public {}
+    // constructor() public {}
 
     function random(uint256 min, uint256 max) public {
         // Transaction-Level PRNG
@@ -33,13 +32,5 @@ contract RandomToken {
 
     function getRandomNumber() public view returns (uint256) {
         return randNumber;
-    }
-
-    function setNumber() public {
-        number = number * 2;
-    }
-
-    function getNumber() public view returns (uint256) {
-        return number;
     }
 }
