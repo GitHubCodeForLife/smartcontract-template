@@ -28,7 +28,7 @@
     "eject": "react-scripts eject",
     "truffle-compile": "truffle compile",
     "truffle-migrate": "truffle migrate",
-    "compile-migrate": "truffle compile && truffle migrate"
+    "compile-migrate": "truffle compile & truffle migrate"
   },
   "eslintConfig": {
     "extends": "react-app"

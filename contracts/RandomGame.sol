@@ -93,6 +93,7 @@ contract RandomGame is Ownable {
         playerCount = 0;
         randNonce = _random;
         gameId++;
+        delete players;
         emit StartGameEvent(gameId, block.timestamp, endTime);
     }
 
