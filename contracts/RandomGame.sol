@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract RandomGame is Ownable {
     using SafeMath for uint256;
 
-    //=================== Struct ===================
+    //=================== Structs ===================
     struct Player {
         address player;
         uint256 stake; // the number of money that player has staked
-        uint8 status; //0: tai, 1: xiu
+        uint8 status; // 0: tai, 1: xiu
     }
 
     struct Dice {
@@ -21,11 +21,14 @@ contract RandomGame is Ownable {
     }
     //====================== Events ==========================
     //Events mean that the contract will emit an event when something happens.
-    event GameEvent(
-        uint8 name, // 0: Start,1: Place a Bet,  2: Finish , 3: Win, 4: Lose, 5: Draw
-        address player, // the player who trigger the event
-        Dice dice // the dice that owner roll
+    event StartGameEvent(uint256 gameId, uint256 timeStart, uint256 timeEnd);
+    event EndGameEvent(
+        uint256 gameId,
+        Player player,
+        uint8 isWiner, //1 is winer, 0 is loser
+        Dice result
     );
+    event PlaceBetEvent(uint256 gameId, Player player);
     //====================== Game States ======================
 
     uint256 public playerCount = 0;
@@ -35,6 +38,7 @@ contract RandomGame is Ownable {
     bool public isEnded = true;
     uint256 public endTime = 0;
     uint256 private randNonce = 0;
+    uint256 public gameId = 0;
 
     constructor() {
         endTime = block.timestamp - 10;
@@ -44,16 +48,19 @@ contract RandomGame is Ownable {
     // Modifiers and requires are conditions that must be met before a function is executed.
     modifier canPlaceBet() {
         require(block.timestamp <= endTime, "The game has ended");
+        require(isEnded == false, "The game has ended");
         _;
     }
 
     modifier canStartGame() {
         require(block.timestamp >= endTime, "The game has not ended");
+        require(isEnded == true, "Game   has not already ended");
         _;
     }
 
     modifier canFinishGame() {
         require(block.timestamp >= endTime, "The game has not ended");
+        require(isEnded == false, "Game has already ended");
         _;
     }
 
@@ -61,7 +68,6 @@ contract RandomGame is Ownable {
     function placeBet(uint256 stake, uint8 status) public payable canPlaceBet {
         // require time <= endTime
         // require money ? later
-        require(!isEnded, "Game has ended");
 
         // If player already place a bet, how can he place another bet?
         Player memory player = Player(msg.sender, stake, status);
@@ -69,34 +75,39 @@ contract RandomGame is Ownable {
         players.push(player);
         playerCount++;
         //Transefer money to owner of contract
-        emit GameEvent(1, msg.sender, Dice(0, 0, 0));
+        emit PlaceBetEvent(gameId, player);
     }
 
     // ====================== Owner Functions ==================
     // Owner functions are functions that can only be called by the owner of the contract.
-    function startGame(uint256 sessionTime) public canStartGame onlyOwner {
-        require(isEnded == true, "Game has already ended");
+
+    /*
+    @param sessionTime: the time that the game will last (in seconds)
+    */
+    function startGame(uint256 sessionTime, uint256 _random) public onlyOwner {
+        //Block timestamp is the number of seconds since the block was created.
         endTime = block.timestamp + sessionTime;
         isEnded = false;
 
         // reset game state
         playerCount = 0;
-        randNonce = 0;
-        emit GameEvent(0, msg.sender, Dice(0, 0, 0));
+        randNonce = _random;
+        gameId++;
+        emit StartGameEvent(gameId, block.timestamp, endTime);
     }
 
     function finishGame() public onlyOwner {
-        require(isEnded == false, "Game has already ended");
         isEnded = true;
+        endTime = block.timestamp;
 
         Dice memory dice = randomDice();
         uint256 totalDice = dice.dice1 + dice.dice2 + dice.dice3;
         for (uint64 i = 0; i < playerCount; i++) {
             Player memory player = players[i];
             if (canWin(player.status, totalDice)) {
-                emit GameEvent(3, player.player, dice);
+                emit EndGameEvent(gameId, player, 1, dice);
             } else {
-                emit GameEvent(4, player.player, dice);
+                emit EndGameEvent(gameId, player, 0, dice);
             }
         }
     }
@@ -130,9 +141,9 @@ contract RandomGame is Ownable {
         pure
         returns (bool)
     {
-        //status: 0  tai 11 - 17
-        //status : 1 xiu 4 - 10
-        if (status == 0) {
+        //status : 1 tai 11 - 17
+        //status : 0 xiu 4 - 10
+        if (status == 1) {
             return totalDice >= 11 && totalDice <= 17;
         } else {
             return totalDice >= 4 && totalDice <= 10;
