@@ -17,7 +17,7 @@ contract("RandomGame", async ([owner, investor]) => {
 
   describe("Test Game flow", async () => {
     it("should play game", async () => {
-      await randomGame.startGame(60 * 60 * 1000);
+      await randomGame.startGame(60);
       console.log("Game started");
       await randomGame.placeBet(100, 1);
       console.log("Bet placed");
@@ -26,7 +26,11 @@ contract("RandomGame", async ([owner, investor]) => {
 
       console.log(await randomGame.getAllPlayers());
       await randomGame.finishGame();
-
+      //   await randomGame.transferOwnership(investor);
+      await randomGame.startGame(60);
+      console.log("Game started");
+      await randomGame.placeBet(100, 1);
+      await randomGame.finishGame();
       console.log("Game finished");
     }).timeout(10000);
   });

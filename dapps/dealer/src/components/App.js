@@ -3,26 +3,20 @@ import Web3 from "web3";
 import Contract from "web3-eth-contract";
 
 import Navbar from "./Navbar";
-import RandomToken from "../abis/RandomContract.json";
-import MyToken from "../abis/MyToken.json";
+import RandomGame from "../abis/RandomGame.json";
 import "./App.css";
 
-let randomContract;
-let myToken;
+let RandomGameContract;
 
 // BLOCK CHAIN INFO
 const url_blockchain = "http://localhost:7545";
 
 // Contract Address
-const randomAddress = "0xb9b159772B69e9F2ECD9252E2Fc264c5c6908E01";
-const tokenAddress = "0x0688F771CBb7404bf7E298BF3e1F7Cf3E5bD8B89";
-
-//Owner Addres
-const ownerAddress = "0x8611140F6969e01afb644D18cE5eaaEA94aC8213";
+const randomGameContract = "0x6f099cdF4ae7a878e3F0d8141E01a7d366485ad5";
 
 function App() {
+  const [time, setTime] = useState(100);
   const [account, setAccount] = useState("");
-  const [diceNumber, setDiceNumber] = useState(0);
 
   //=================State functions =====================
   useEffect(() => {
@@ -32,21 +26,35 @@ function App() {
   }, []);
 
   //=================Event functions =====================s
-  async function rollDice() {
-    console.log("Rolling dice...");
-    console.log({ randomToken: randomContract });
-    await randomContract.methods.random(3, 18).send({ from: account });
+  async function startGame() {
+    console.log("Start game");
+    console.log({ randomToken: RandomGameContract });
+    console.log({ time });
+    try {
+      //random from 0 to 1000
+      const randNone = Math.floor(Math.random() * 1000);
+      await RandomGameContract.methods.startGame(time, randNone).send({
+        from: account,
+      });
+      setTimeout(() => {
+        finishGame();
+      }, time * 1000);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-    const rand = await randomContract.methods.getRandomNumber().call();
-    console.log({ rand });
-    setDiceNumber(rand);
-
-    await myToken.methods
-      .transfer(ownerAddress, 100000000)
-      .send({ from: account });
-
-    const balance = await myToken.methods.balanceOf(account).call();
-    console.log({ balance });
+  async function finishGame() {
+    console.log("Finish game");
+    console.log({ randomToken: RandomGameContract });
+    try {
+      await RandomGameContract.methods.finishGame().send({
+        from: account,
+        gas: "1000000",
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //=================Helper functions =====================
@@ -70,8 +78,7 @@ function App() {
   }
   async function loadContracts() {
     Contract.setProvider(url_blockchain);
-    randomContract = await new Contract(RandomToken.abi, randomAddress);
-    myToken = await new Contract(MyToken.abi, tokenAddress);
+    RandomGameContract = await new Contract(RandomGame.abi, randomGameContract);
   }
 
   return (
@@ -90,9 +97,18 @@ function App() {
                 target="_blank"
                 rel="noopener noreferrer"
               ></a>
-
-              <button onClick={rollDice}> Roll Dice </button>
-              <p>{diceNumber}</p>
+              <br></br>
+              <button onClick={startGame}> Start Game</button>
+              <br></br>
+              <button onClick={finishGame}> Finish Game</button>
+              <br></br>
+              {/* Input for stake number */}
+              <input
+                type="number"
+                placeholder="Enter  the time in seconds"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
             </div>
           </main>
         </div>

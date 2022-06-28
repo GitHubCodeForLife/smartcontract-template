@@ -84,16 +84,3 @@ npm install @truffle/hdwallet-provider
 
 
 
-
-
-
- RandomGameContract.events
-      .GameEvent({
-        fromBlock: 0,
-        toBlock: "latest",
-      })
-      .on("data", (event) => {
-        console.log(event);
-        // setDiceNumber(event.returnValues.diceNumber);
-      })
-      .on("error", console.error);
