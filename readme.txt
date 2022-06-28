@@ -19,7 +19,7 @@ To run this app:
 5. truffle migrate (to migrate truffle contracts)
 
 truffle error : C:\Users\ASUS\AppData\Roaming\npm
-
+ C:\Users\ASUS\AppData\Local\Temp\test--4348-FImqrN1C8SU3
 ================================
 Usages: 
 - Metamask config 
@@ -45,3 +45,42 @@ Call Contract in React APP we need:
 
 send methods: 
 call methods: 
+
+
+==============================
+Blockchain: 
+- Solidity: 
++ Random for multi numbers
++ Payment 
+
+- Frontend 
+
+Machine Learning: 
+- 1. RNN, CNN, LSTM, XGBoost
+- 2. Features 
+
+
+=============================
+EVN Version: 
+https://trufflesuite.com/docs/truffle/reference/configuration/
+
+
+
+
+==============================
+Deploy to Rinkeby:
+npm install @truffle/hdwallet-provider
+1. truffle migrate --network rinkeby
+2. truffle migrate –network main
+
+
+
+
+
+
+
+
+
+
+
+
