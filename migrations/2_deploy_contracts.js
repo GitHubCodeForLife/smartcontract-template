@@ -1,23 +1,29 @@
-const DappToken = artifacts.require('DappToken')
-const DaiToken = artifacts.require('DaiToken')
-const TokenFarm = artifacts.require('TokenFarm')
+const RandomGame = artifacts.require("RandomGame");
 
 module.exports = async function(deployer, network, accounts) {
-  // Deploy Mock DAI Token
-  await deployer.deploy(DaiToken)
-  const daiToken = await DaiToken.deployed()
+  if (network === "rinkeby") {
+    await deployInRinkeByTestNet(deployer);
+  } else if (network === "development") {
+    await deployInDevelopmentNetwork(deployer, accounts);
+  }
+};
 
-  // Deploy Dapp Token
-  await deployer.deploy(DappToken)
-  const dappToken = await DappToken.deployed()
+async function deployInRinkeByTestNet(deployer) {
+  await deployer.deploy(RandomGame);
+}
 
-  // Deploy TokenFarm
-  await deployer.deploy(TokenFarm, dappToken.address, daiToken.address)
-  const tokenFarm = await TokenFarm.deployed()
+async function deployInDevelopmentNetwork(deployer, accounts) {
+  await deployer.deploy(RandomGame);
+  const random = await RandomGame.deployed();
+  // // console.log({ random });
+  // await deployer.deploy(MyToken);
+  // const myToken = await MyToken.deployed();
+  // // console.log({ myToken });
 
-  // Transfer all tokens to TokenFarm (1 million)
-  await dappToken.transfer(tokenFarm.address, '1000000000000000000000000')
-
-  // Transfer 100 Mock DAI tokens to investor
-  await daiToken.transfer(accounts[1], '100000000000000000000')
+  // /*
+  //  Dealer will be the first account
+  // */
+  // await myToken.mint(accounts[0], 100);
+  // const balance = await myToken.balanceOf(accounts[0]);
+  // console.log({ balance });
 }
