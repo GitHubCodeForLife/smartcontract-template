@@ -12,7 +12,7 @@ let RandomGameContract;
 const url_blockchain = "ws://localhost:7545";
 
 // Contract Address
-const randomGameContract = "0x6f099cdF4ae7a878e3F0d8141E01a7d366485ad5";
+const randomGameContract = "0xD84551ca1393f90f8ba3c0293FC82B4365A2a96c";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -155,9 +155,9 @@ function App() {
                   id="radio-item-1"
                   name="radio-item-1"
                   type="radio"
-                  value="0"
+                  value="1"
                   onChange={handleRadioChange}
-                  checked={status === "0"}
+                  checked={status === "1"}
                 />
                 <label htmlFor="radio-item-1">Tai</label>
               </div>
@@ -166,9 +166,9 @@ function App() {
                   id="radio-item-2"
                   name="radio-item-2"
                   type="radio"
-                  value="1"
+                  value="0"
                   onChange={handleRadioChange}
-                  checked={status === "1"}
+                  checked={status === "0"}
                 />
                 <label htmlFor="radio-item-2">Xiu</label>
               </div>
