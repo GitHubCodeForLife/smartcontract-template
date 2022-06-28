@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const RandomGame = artifacts.require("RandomGame");
 
 require("chai")

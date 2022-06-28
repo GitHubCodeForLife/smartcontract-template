@@ -12,7 +12,7 @@ let RandomGameContract;
 const url_blockchain = "http://localhost:7545";
 
 // Contract Address
-const randomGameContract = "0x6f099cdF4ae7a878e3F0d8141E01a7d366485ad5";
+const randomGameContract = "0xD84551ca1393f90f8ba3c0293FC82B4365A2a96c";
 
 function App() {
   const [time, setTime] = useState(100);
@@ -77,6 +77,7 @@ function App() {
     setAccount(accounts[0]);
   }
   async function loadContracts() {
+    
     Contract.setProvider(url_blockchain);
     RandomGameContract = await new Contract(RandomGame.abi, randomGameContract);
   }

@@ -141,9 +141,9 @@ contract RandomGame is Ownable {
         pure
         returns (bool)
     {
-        //status : 0  tai 11 - 17
-        //status : 1 xiu 4 - 10
-        if (status == 0) {
+        //status : 1 tai 11 - 17
+        //status : 0 xiu 4 - 10
+        if (status == 1) {
             return totalDice >= 11 && totalDice <= 17;
         } else {
             return totalDice >= 4 && totalDice <= 10;
