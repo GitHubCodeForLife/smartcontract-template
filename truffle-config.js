@@ -23,13 +23,8 @@ module.exports = {
     },
   },
   contracts_directory: "./contracts/",
-<<<<<<< HEAD
-  contracts_build_directory: "./dapps/dealer/src/abis/",
-  //contracts_build_directory: "./dapps/player/src/abis/",
-=======
   // contracts_build_directory: "./dapps/dealer/src/abis/",
   contracts_build_directory: "./dapps/player/src/abis/",
->>>>>>> d1325a72aaa75925bfaafef780dcca10d415d507
   compilers: {
     solc: {
       version: "0.6.8",
