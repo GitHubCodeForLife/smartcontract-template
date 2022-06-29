@@ -1,87 +1,30 @@
-import React, { Component, useEffect, useState } from "react";
-import Web3 from "web3";
-import Contract from "web3-eth-contract";
-import Navbar from "./Navbar";
-import RandomGame from "../abis/RandomGame.json";
+import React, { useEffect, useState } from "react";
 import "./App.css";
+import Navbar from "./Navbar";
 
-let RandomGameContract;
-// BLOCK CHAIN INFO
-// rinker by test nest
+import web3 from "../utils/web3";
+import RandomGameContract from "../utils/RandomGameContract";
+import CountDownTime from "./CountDownTime";
 
-const url_blockchain =
-  "wss://rinkeby.infura.io/ws/v3/a17fe233314c4e95bceb4bc4fb3399ca";
-// ("https://mainnet.infura.io/v3/a17fe233314c4e95bceb4bc4fb3399ca");
-// https://rinkeby.infura.io/v3/acbb86b9cfc44c61ab6cf4a03fcee90b"
-// Contract Address
-const randomGameAddress = "0x19dfa5b2d59826cee1f0697ad853f5118aa3275b";
-
-function App() {
+function Player() {
   const [account, setAccount] = useState("");
   const [diceNumber, setDiceNumber] = useState("");
-  const [stake, setStake] = useState(100);
+  const [stake, setStake] = useState(0.0001);
   const [status, setStatus] = useState("1");
+  const [countTime, setCountTime] = useState(0);
 
   //=================State functions =====================
   useEffect(() => {
-    loadWeb3();
     loadAccountFromMetaMask();
-    loadContracts();
+    registerEvent();
   }, []);
 
-  //=================Event functions =====================
-  async function rollDice() {
-    console.log("Rolling dice...");
-    console.log({ randomToken: RandomGameContract });
-    console.log({ stake, status });
-    try {
-      await RandomGameContract.methods
-        .startGame(parseInt(stake), parseInt(status))
-        .call({ from: account, value: Web3.utils.toWei("0.01", "ether") });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleRadioChange = (e) => {
-    setStatus(e.target.value);
-  };
-
-  //=================Helper functions =====================
-  async function loadWeb3() {
-    Contract.setProvider(url_blockchain);
-
-    if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-    } else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-      window.alert(
-        "Non-Ethereum browser detected. You should consider trying MetaMask!"
-      );
-    }
-  }
-
   async function loadAccountFromMetaMask() {
-    try {
-      const web3 = window.web3;
-      const accounts = await web3.eth.getAccounts();
-      setAccount(accounts[0]);
-    } catch (error) {
-      console.log(error);
-    }
+    const accounts = await web3.eth.getAccounts();
+    setAccount(accounts[0]);
   }
-  async function loadContracts() {
-    Contract.setProvider(url_blockchain);
-    const provider = new Web3.providers.WebsocketProvider(url_blockchain);
-    const web3 = new Web3(provider);
+  async function registerEvent() {
     try {
-      RandomGameContract = await new web3.eth.Contract(
-        RandomGame.abi,
-        randomGameAddress
-      );
-
       // register event listener
       RandomGameContract.events
         .StartGameEvent({
@@ -90,18 +33,14 @@ function App() {
         })
         .on("data", (event) => {
           console.log(event);
-          // setDiceNumber(event.returnValues.diceNumber);
-        })
-        .on("error", console.error);
-
-      RandomGameContract.events
-        .StartGameEvent({
-          fromBlock: 0,
-          toBlock: "latest",
-        })
-        .on("data", (event) => {
-          console.log(event);
-          // setDiceNumber(event.returnValues.diceNumber);
+          const timeStart = event.returnValues.timeStart;
+          const timeEnd = event.returnValues.timeEnd;
+          const countTime = timeEnd - timeStart;
+          const currentTimeInSecond = new Date().getTime() / 1000;
+          if (currentTimeInSecond < timeEnd) {
+            setCountTime(countTime);
+            console.log({ timeStart, timeEnd, countTime });
+          }
         })
         .on("error", console.error);
 
@@ -111,11 +50,12 @@ function App() {
           toBlock: "latest",
         })
         .on("data", (event) => {
+          setCountTime(0);
           console.log(event);
           // setDiceNumber(event.returnValues.diceNumber);
           //if (event.returnValues.player.player === account) {
-          const isWiner = event.returnValues.isWiner == 1 ? true : false;
-          alert(`You ${isWiner ? "win" : "lose"}`);
+          // const isWiner = event.returnValues.isWiner == 1 ? true : false;
+          // alert(`You ${isWiner ? "win" : "lose"}`);
           // }
         })
         .on("error", console.error);
@@ -134,6 +74,28 @@ function App() {
       console.log(error);
     }
   }
+
+  //=================Event functions =====================
+  async function rollDice() {
+    console.log("Rolling dice...");
+    console.log({ randomToken: RandomGameContract });
+    console.log({ stake, status });
+
+    try {
+      const eth = web3.utils.toWei(stake.toString(), "ether");
+      await RandomGameContract.methods.placeBet(eth, parseInt(status)).send({
+        from: account,
+        value: eth,
+        gas: "1000000",
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  const handleRadioChange = (e) => {
+    setStatus(e.target.value);
+  };
 
   return (
     <div>
@@ -161,15 +123,16 @@ function App() {
                 value={stake}
                 onChange={(e) => setStake(e.target.value)}
               />
+              <label>ETH</label>
               {/* Radio Groupb */}
               <div>
                 <input
                   id="radio-item-1"
                   name="radio-item-1"
                   type="radio"
-                  value="0"
+                  value="1"
                   onChange={handleRadioChange}
-                  checked={status === "0"}
+                  checked={status === "1"}
                 />
                 <label htmlFor="radio-item-1">Tai</label>
               </div>
@@ -178,12 +141,13 @@ function App() {
                   id="radio-item-2"
                   name="radio-item-2"
                   type="radio"
-                  value="1"
+                  value="0"
                   onChange={handleRadioChange}
-                  checked={status === "1"}
+                  checked={status === "0"}
                 />
                 <label htmlFor="radio-item-2">Xiu</label>
               </div>
+              {countTime > 0 && <CountDownTime time={countTime} />}
             </div>
           </main>
         </div>
@@ -192,4 +156,4 @@ function App() {
   );
 }
 
-export default App;
+export default Player;

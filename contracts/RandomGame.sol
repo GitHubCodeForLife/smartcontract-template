@@ -60,7 +60,7 @@ contract RandomGame is Ownable {
 
     modifier canPlaceBet() {
         //check player has enough money to bet && money is greater than 0.5 ether
-        require(msg.value > 0.5 gwei, "Player must have enough money to bet");
+        // require(msg.value > 0.5 gwei, "Player must have enough money to bet");
         // require(msg.value == stake, "Player must have enough money to bet");
 
         //check max player
@@ -76,11 +76,11 @@ contract RandomGame is Ownable {
 
     modifier canStartGame() {
         //check the owner has enough money to start the game
-        require(
-            // msg.value >= (maxPlayerCount + 1) * 0.5 ether,
-            msg.value >= 10 gwei,
-            "The owner has not enough money to start the game"
-        );
+        // require(
+        //     // msg.value >= (maxPlayerCount + 1) * 0.5 ether,
+        //     msg.value >= 10 gwei,
+        //     "The owner has not enough money to start the game"
+        // );
         require(block.timestamp >= endTime, "The game has not ended");
         require(isEnded == true, "Game   has not already ended");
         _;
