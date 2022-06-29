@@ -13,17 +13,6 @@ async function deployInRinkeByTestNet(deployer) {
 }
 
 async function deployInDevelopmentNetwork(deployer, accounts) {
-  await deployer.deploy(RandomGame);
-  const random = await RandomGame.deployed();
-  // // console.log({ random });
-  // await deployer.deploy(MyToken);
-  // const myToken = await MyToken.deployed();
-  // // console.log({ myToken });
-
-  // /*
-  //  Dealer will be the first account
-  // */
-  // await myToken.mint(accounts[0], 100);
-  // const balance = await myToken.balanceOf(accounts[0]);
-  // console.log({ balance });
+  // await deployer.deploy(RandomGame);
+  // const random = await RandomGame.deployed();
 }

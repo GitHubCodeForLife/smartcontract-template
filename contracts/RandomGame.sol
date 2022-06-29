@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+pragma solidity >=0.4.22 <0.7.0;
+pragma experimental ABIEncoderV2;
+
+import "./Ownable.sol";
+import "./SafeMath.sol";
 
 contract RandomGame is Ownable {
     using SafeMath for uint256;
 
     //=================== Structs ===================
     struct Player {
-        address player;
+        address payable addr;
         uint256 stake; // the number of money that player has staked
-        uint8 status; // 0: tai, 1: xiu
+        uint8 status; // 0: xiu, 1: tai
+        uint8 isWinner; // 0: Lose, 1: Win
     }
 
     struct Dice {
@@ -22,17 +24,14 @@ contract RandomGame is Ownable {
     //====================== Events ==========================
     //Events mean that the contract will emit an event when something happens.
     event StartGameEvent(uint256 gameId, uint256 timeStart, uint256 timeEnd);
-    event EndGameEvent(
-        uint256 gameId,
-        Player player,
-        uint8 isWiner, //1 is winer, 0 is loser
-        Dice result
-    );
-    event PlaceBetEvent(uint256 gameId, Player player);
+    event EndGameEvent(uint256 gameId, Player[] players, Dice result);
+    event PlaceBetEvent(uint256 gameId, Player player, uint256 totalPlayer);
+    event Received(address, uint256);
+
     //====================== Game States ======================
 
     uint256 public playerCount = 0;
-    uint256 public maxPlayerCount = 100;
+    uint256 public constant maxPlayerCount = 100;
     Player[] public players;
 
     bool public isEnded = true;
@@ -40,19 +39,48 @@ contract RandomGame is Ownable {
     uint256 private randNonce = 0;
     uint256 public gameId = 0;
 
-    constructor() {
-        endTime = block.timestamp - 10;
+    //====================== Fallback and Receive Functions ======================
+    fallback() external payable {
+        // do nothing here
+    }
+
+    receive() external payable {
+        // do nothing here
     }
 
     // ====================== Modifier =========================
     // Modifiers and requires are conditions that must be met before a function is executed.
+    // Game Condition:
+    // Player:
+    //      max player = 100
+    //      max stake = 10 Gwei
+    // Owner:
+    //      Start Game condition has enough money to pay for the game
+    //      End Game condition has enough money to pay for the game
+
     modifier canPlaceBet() {
+        //check player has enough money to bet && money is greater than 0.5 ether
+        // require(msg.value > 0.5 gwei, "Player must have enough money to bet");
+        // require(msg.value == stake, "Player must have enough money to bet");
+
+        //check max player
+
+        //check player is not in game
+
+        //check max and min stake
+
         require(block.timestamp <= endTime, "The game has ended");
         require(isEnded == false, "The game has ended");
         _;
     }
 
     modifier canStartGame() {
+        //check the owner has enough money to start the game
+        // require(
+        //     // msg.value >= (maxPlayerCount + 1) * 0.5 ether,
+        //     msg.value >= 10 gwei,
+        //     "The owner has not enough money to start the game"
+        // );
         require(block.timestamp >= endTime, "The game has not ended");
         require(isEnded == true, "Game   has not already ended");
         _;
@@ -66,16 +94,12 @@ contract RandomGame is Ownable {
 
     // ====================== Player Functions ==================
     function placeBet(uint256 stake, uint8 status) public payable canPlaceBet {
-        // require time <= endTime
-        // require money ? later
-
-        // If player already place a bet, how can he place another bet?
-        Player memory player = Player(msg.sender, stake, status);
-        // players[playerCount] = player;
+        Player memory player = Player(msg.sender, stake, status, 0);
         players.push(player);
         playerCount++;
+
         //Transefer money to owner of contract
-        emit PlaceBetEvent(gameId, player);
+        emit PlaceBetEvent(gameId, player, playerCount);
     }
 
     // ====================== Owner Functions ==================
@@ -84,7 +108,12 @@ contract RandomGame is Ownable {
     /*
     @param sessionTime: the time that the game will last (in seconds)
     */
-    function startGame(uint256 sessionTime, uint256 _random) public onlyOwner {
+    function startGame(uint256 sessionTime, uint256 _random)
+        public
+        payable
+        onlyOwner
+        canStartGame
+    {
         //Block timestamp is the number of seconds since the block was created.
         endTime = block.timestamp + sessionTime;
         isEnded = false;
@@ -93,6 +122,10 @@ contract RandomGame is Ownable {
         playerCount = 0;
         randNonce = _random;
         gameId++;
+<<<<<<< HEAD
+=======
+
+>>>>>>> d1325a72aaa75925bfaafef780dcca10d415d507
         delete players;
         emit StartGameEvent(gameId, block.timestamp, endTime);
     }
@@ -103,14 +136,23 @@ contract RandomGame is Ownable {
 
         Dice memory dice = randomDice();
         uint256 totalDice = dice.dice1 + dice.dice2 + dice.dice3;
+
+        Player[] memory result = new Player[](playerCount);
         for (uint64 i = 0; i < playerCount; i++) {
             Player memory player = players[i];
             if (canWin(player.status, totalDice)) {
-                emit EndGameEvent(gameId, player, 1, dice);
+                player.isWinner = 1;
+                (bool isSuccess, ) = player.addr.call{
+                    value: (player.stake * 19) / 10
+                }("");
+                require(isSuccess == true, "Transfer money to player failed");
             } else {
-                emit EndGameEvent(gameId, player, 0, dice);
+                player.isWinner = 0;
             }
+            result[i] = player;
         }
+        emit EndGameEvent(gameId, result, dice);
+        withDrawAllMoney();
     }
 
     // ====================== Helper Functions ==================
@@ -142,8 +184,8 @@ contract RandomGame is Ownable {
         pure
         returns (bool)
     {
-        //status : 1 tai 11 - 17
-        //status : 0 xiu 4 - 10
+        //status : 0  xiu 4 - 10
+        //status : 1  tai 11 - 17
         if (status == 1) {
             return totalDice >= 11 && totalDice <= 17;
         } else {
@@ -151,9 +193,15 @@ contract RandomGame is Ownable {
         }
     }
 
+    function withDrawAllMoney() public {
+        (bool isSuccess, ) = msg.sender.call{value: address(this).balance}("");
+        require(isSuccess == true, "Cannot withdraw");
+    }
+
     // ======= Testing functions helpers ============
     // Testing functions are functions that are used to test the contract.
-    function getAllPlayers() public view returns (Player[] memory) {
-        return players;
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }

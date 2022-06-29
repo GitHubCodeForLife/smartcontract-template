@@ -1,41 +1,38 @@
 import React, { Component, useEffect, useState } from "react";
-import Web3 from "web3";
-import Contract from "web3-eth-contract";
 
 import Navbar from "./Navbar";
-import RandomGame from "../abis/RandomGame.json";
 import "./App.css";
 
-let RandomGameContract;
-
-// BLOCK CHAIN INFO
-const url_blockchain = "http://localhost:7545";
-
-// Contract Address
-const randomGameContract = "0xB40D59999328b8AF90d15deB122e6AAb0dd79e8F";
+import web3 from "../utils/web3";
+import RandomGameContract from "../utils/RandomGameContract";
+import CountDownTime from "./CountDownTime";
 
 function Host() {
   const [time, setTime] = useState(100);
+  const [countTime, setCountTime] = useState(0);
   const [account, setAccount] = useState("");
 
   //=================State functions =====================
   useEffect(() => {
-    loadWeb3();
     loadAccountFromMetaMask();
-    loadContracts();
   }, []);
 
-  //=================Event functions =====================s
+  //=================Event functions =====================
   async function startGame() {
     console.log("Start game");
     console.log({ randomToken: RandomGameContract });
     console.log({ time });
     try {
       //random from 0 to 1000
+      const eth = web3.utils.toWei("0.02", "ether");
       const randNone = Math.floor(Math.random() * 1000);
       await RandomGameContract.methods.startGame(time, randNone).send({
         from: account,
+        gas: "1000000",
+        value: eth,
       });
+      setCountTime(0);
+      setCountTime(time);
       setTimeout(() => {
         finishGame();
       }, time * 1000);
@@ -58,28 +55,10 @@ function Host() {
   }
 
   //=================Helper functions =====================
-  async function loadWeb3() {
-    if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-    } else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-      window.alert(
-        "Non-Ethereum browser detected. You should consider trying MetaMask!"
-      );
-    }
-  }
 
   async function loadAccountFromMetaMask() {
-    const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     setAccount(accounts[0]);
-  }
-  async function loadContracts() {
-    
-    Contract.setProvider(url_blockchain);
-    RandomGameContract = await new Contract(RandomGame.abi, randomGameContract);
   }
 
   return (
@@ -110,6 +89,7 @@ function Host() {
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
               />
+              {countTime > 0 && <CountDownTime time={countTime} />}
             </div>
           </main>
         </div>
