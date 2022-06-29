@@ -1,18 +1,20 @@
 import React, { Component, useEffect, useState } from "react";
 import Web3 from "web3";
 import Contract from "web3-eth-contract";
-
 import Navbar from "./Navbar";
 import RandomGame from "../abis/RandomGame.json";
 import "./App.css";
 
 let RandomGameContract;
-
 // BLOCK CHAIN INFO
-const url_blockchain = "ws://localhost:7545";
+// rinker by test nest
 
+const url_blockchain =
+  "wss://rinkeby.infura.io/ws/v3/a17fe233314c4e95bceb4bc4fb3399ca";
+// ("https://mainnet.infura.io/v3/a17fe233314c4e95bceb4bc4fb3399ca");
+// https://rinkeby.infura.io/v3/acbb86b9cfc44c61ab6cf4a03fcee90b"
 // Contract Address
-const randomGameContract = "0x6f099cdF4ae7a878e3F0d8141E01a7d366485ad5";
+const randomGameAddress = "0x19dfa5b2d59826cee1f0697ad853f5118aa3275b";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -33,14 +35,9 @@ function App() {
     console.log({ randomToken: RandomGameContract });
     console.log({ stake, status });
     try {
-      // const result = await RandomGameContract.methods.endTime().call();
-      // console.log({ result });
       await RandomGameContract.methods
-        .placeBet(parseInt(stake), parseInt(status))
-        .send({
-          from: account,
-          gas: "1000000",
-        });
+        .startGame(parseInt(stake), parseInt(status))
+        .call({ from: account, value: Web3.utils.toWei("0.01", "ether") });
     } catch (error) {
       console.log(error);
     }
@@ -52,6 +49,8 @@ function App() {
 
   //=================Helper functions =====================
   async function loadWeb3() {
+    Contract.setProvider(url_blockchain);
+
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -65,62 +64,75 @@ function App() {
   }
 
   async function loadAccountFromMetaMask() {
-    const web3 = window.web3;
-    const accounts = await web3.eth.getAccounts();
-    setAccount(accounts[0]);
+    try {
+      const web3 = window.web3;
+      const accounts = await web3.eth.getAccounts();
+      setAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
   }
   async function loadContracts() {
     Contract.setProvider(url_blockchain);
-    RandomGameContract = await new Contract(RandomGame.abi, randomGameContract);
+    const provider = new Web3.providers.WebsocketProvider(url_blockchain);
+    const web3 = new Web3(provider);
+    try {
+      RandomGameContract = await new web3.eth.Contract(
+        RandomGame.abi,
+        randomGameAddress
+      );
 
-    // register event listener
-    RandomGameContract.events
-      .StartGameEvent({
-        fromBlock: 0,
-        toBlock: "latest",
-      })
-      .on("data", (event) => {
-        console.log(event);
-        // setDiceNumber(event.returnValues.diceNumber);
-      })
-      .on("error", console.error);
+      // register event listener
+      RandomGameContract.events
+        .StartGameEvent({
+          fromBlock: 0,
+          toBlock: "latest",
+        })
+        .on("data", (event) => {
+          console.log(event);
+          // setDiceNumber(event.returnValues.diceNumber);
+        })
+        .on("error", console.error);
 
-    RandomGameContract.events
-      .StartGameEvent({
-        fromBlock: 0,
-        toBlock: "latest",
-      })
-      .on("data", (event) => {
-        console.log(event);
-        // setDiceNumber(event.returnValues.diceNumber);
-      })
-      .on("error", console.error);
+      RandomGameContract.events
+        .StartGameEvent({
+          fromBlock: 0,
+          toBlock: "latest",
+        })
+        .on("data", (event) => {
+          console.log(event);
+          // setDiceNumber(event.returnValues.diceNumber);
+        })
+        .on("error", console.error);
 
-    RandomGameContract.events
-      .EndGameEvent({
-        fromBlock: 0,
-        toBlock: "latest",
-      })
-      .on("data", (event) => {
-        console.log(event);
-        // setDiceNumber(event.returnValues.diceNumber);
-        //if (event.returnValues.player.player === account) {
-        const isWiner = event.returnValues.isWiner == 1 ? true : false;
-        alert(`You ${isWiner ? "win" : "lose"}`);
-        // }
-      })
-      .on("error", console.error);
+      RandomGameContract.events
+        .EndGameEvent({
+          fromBlock: 0,
+          toBlock: "latest",
+        })
+        .on("data", (event) => {
+          console.log(event);
+          // setDiceNumber(event.returnValues.diceNumber);
+          //if (event.returnValues.player.player === account) {
+          const isWiner = event.returnValues.isWiner == 1 ? true : false;
+          alert(`You ${isWiner ? "win" : "lose"}`);
+          // }
+        })
+        .on("error", console.error);
 
-    RandomGameContract.events
-      .PlaceBetEvent({
-        fromBlock: 0,
-        toBlock: "latest",
-      })
-      .on("data", (event) => {
-        console.log(event);
-        // setDiceNumber(event.returnValues.diceNumber);
-      })
-      .on("error", console.error);
+      RandomGameContract.events
+        .PlaceBetEvent({
+          fromBlock: 0,
+          toBlock: "latest",
+        })
+        .on("data", (event) => {
+          console.log(event);
+          // setDiceNumber(event.returnValues.diceNumber);
+        })
+        .on("error", console.error);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (

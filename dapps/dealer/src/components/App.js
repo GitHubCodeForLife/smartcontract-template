@@ -35,6 +35,7 @@ function App() {
       const randNone = Math.floor(Math.random() * 1000);
       await RandomGameContract.methods.startGame(time, randNone).send({
         from: account,
+        // value: web3.utils.toWei("1", "ether"),
       });
       setTimeout(() => {
         finishGame();
