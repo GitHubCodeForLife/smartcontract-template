@@ -4,40 +4,64 @@ import Navbar from "./Navbar";
 import "./App.css";
 
 import web3 from "../utils/web3";
-import RandomGameContract from "../utils/RandomGameContract";
+import { HostGameContract as RandomGameContract } from "../utils/RandomGameContract";
 import CountDownTime from "./CountDownTime";
 
+// let RandomGameContract;
+
 function Host() {
-  const [time, setTime] = useState(100);
+  const [time, setTime] = useState(20);
   const [countTime, setCountTime] = useState(0);
   const [account, setAccount] = useState("");
 
   //=================State functions =====================
   useEffect(() => {
     loadAccountFromMetaMask();
+    registerEvent();
   }, []);
 
   //=================Event functions =====================
+  async function registerEvent() {
+    try {
+      // register event listener
+      RandomGameContract.events
+        .StartGameEvent({
+          fromBlock: 0,
+          toBlock: "latest",
+        })
+        .on("data", (event) => {
+          console.log(event);
+          const timeStart = event.returnValues.timeStart;
+          const timeEnd = event.returnValues.timeEnd;
+          const countTime = timeEnd - timeStart;
+          const currentTimeInSecond = new Date().getTime() / 1000;
+          if (currentTimeInSecond < timeEnd) {
+            setCountTime(0);
+            setCountTime(countTime);
+            // setTimeout(finishGame, countTime * 1000);
+          }
+        })
+        .on("error", console.error);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function startGame() {
     console.log("Start game");
     console.log({ randomToken: RandomGameContract });
     console.log({ time });
     try {
       //random from 0 to 1000
-      const eth = web3.utils.toWei("0.02", "ether");
+      const eth = web3.utils.toWei("19", "ether");
       const randNone = Math.floor(Math.random() * 1000);
       await RandomGameContract.methods.startGame(time, randNone).send({
         from: account,
         gas: "1000000",
         value: eth,
       });
-      setCountTime(0);
-      setCountTime(time);
-      setTimeout(() => {
-        finishGame();
-      }, time * 1000);
     } catch (error) {
-      console.log(error);
+      console.log({ error });
     }
   }
 
@@ -50,7 +74,11 @@ function Host() {
         gas: "1000000",
       });
     } catch (error) {
-      console.log(error);
+      if (error.message && error.message.split("'")[1]) {
+        const err = JSON.parse(error.message.split("'")[1]);
+        console.log("error: ", err.value.data.message);
+      }
+      console.log({ error });
     }
   }
 
@@ -59,6 +87,7 @@ function Host() {
   async function loadAccountFromMetaMask() {
     const accounts = await web3.eth.getAccounts();
     setAccount(accounts[0]);
+    console.log({ accounts });
   }
 
   return (
@@ -91,6 +120,16 @@ function Host() {
               />
               {countTime > 0 && <CountDownTime time={countTime} />}
             </div>
+            <button
+              onClick={async () => {
+                const balance = await RandomGameContract.methods
+                  .getBalance()
+                  .call();
+                console.log({ balance });
+              }}
+            >
+              get balance
+            </button>
           </main>
         </div>
       </div>

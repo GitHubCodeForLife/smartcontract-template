@@ -9,7 +9,7 @@ function tokens(n) {
   return web3.utils.toWei(n, "ether");
 }
 
-contract("RandomGame", async ([owner, player1, player2, player3]) => {
+contract("RandomGame", async ([owner, player1, player2, player3, player4]) => {
   let randomGame;
 
   before(async () => {
@@ -17,54 +17,83 @@ contract("RandomGame", async ([owner, player1, player2, player3]) => {
   });
 
   // describe("Test Start Game", async () => {
-  //   //   it("test start game role owner", async () => {
-  //   //     await randomGame.startGame(10, 10, { from: owner, value: tokens("10") })
-  //   //       .should.be.fulfilled;
-  //   //   });
+  //   it("test start game with 19 eth", async () => {
+  //     await randomGame.startGame(10, 10, { from: owner, value: tokens("19") })
+  //       .should.be.fulfilled;
+  //     await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //   });
+  //   it("test start game with 20 eth", async () => {
+  //     await randomGame.startGame(10, 10, { from: owner, value: tokens("20") })
+  //       .should.be.fulfilled;
+  //     await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //   });
+  //   it("test start game with 18 eth", async () => {
+  //     await randomGame.startGame(10, 10, { from: owner, value: tokens("18") })
+  //       .should.be.fulfilled;
+  //     await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //   });
   // });
-
-  describe("Test Finish Game", async () => {
-    it("test finish game role owner", async () => {
-      await randomGame.startGame(10, 10, { from: owner, value: tokens("10") })
-        .should.be.fulfilled;
-      await randomGame.placeBet(tokens("3"), 1, {
-        from: player1,
-        value: tokens("3"),
-      }).should.be.fulfilled;
-      await randomGame.placeBet(tokens("3"), 0, {
-        from: player2,
-        value: tokens("3"),
-      }).should.be.fulfilled;
+  describe("Can place bet", async () => {
+    it("test start game with 19 eth", async () => {
+      // await randomGame.startGame(10, 10, { from: owner, value: tokens("19") })
+      //   .should.be.fulfilled;
+      // await randomGame.placeBet(tokens("1"), 1, {
+      //   from: player2,
+      //   value: tokens("1"),
+      // }).should.be.fulfilled;
+      // await randomGame.placeBet(tokens("1"), 0, {
+      //   from: player3,
+      //   value: tokens("1"),
+      // }).should.be.fulfilled;
+      // await randomGame.placeBet(tokens("1"), 0, {
+      //   from: player4,
+      //   value: tokens("1"),
+      // }).should.be.fulfilled;
       await randomGame.finishGame({ from: owner }).should.be.fulfilled;
     });
   });
+  // describe("Test Finish Game", async () => {
+  //   it("test finish game role owner", async () => {
+  //     await randomGame.startGame(10, 10, { from: owner, value: tokens("10") })
+  //       .should.be.fulfilled;
+  //     await randomGame.placeBet(tokens("3"), 1, {
+  //       from: player1,
+  //       value: tokens("3"),
+  //     }).should.be.fulfilled;
+  //     await randomGame.placeBet(tokens("3"), 0, {
+  //       from: player2,
+  //       value: tokens("3"),
+  //     }).should.be.fulfilled;
+  //     await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //   });
+  // });
 
-  describe("Test Play Game", async () => {
-    // it("test play game with many players", async () => {
-    //   await randomGame.startGame(10, 10, { from: owner }).should.be.fulfilled;
-    //   await randomGame.placeBet(100, 1, { from: player1 }).should.be.fulfilled;
-    //   await randomGame.placeBet(100, 0, { from: player2 }).should.be.fulfilled;
-    //   console.log(await randomGame.getAllPlayers());
-    //   await randomGame.finishGame({ from: owner }).should.be.fulfilled;
-    // });
-    it("test play game with many players with 2 start times", async () => {
-      // await randomGame.startGame(10, 10, { from: owner, value: tokens("10") })
-      //   .should.be.fulfilled;
-      // await randomGame.placeBet(10, 1, { from: player1 }).should.be.fulfilled;
-      // console.log(await randomGame.getAllPlayers());
-      // console.log(await randomGame.totalSupply());
-      // console.log(await randomGame.getBalance());
-      // await randomGame.finishGame({ from: owner }).should.be.fulfilled;
-      // await randomGame.startGame(10, 10, { from: owner }).should.be.fulfilled;
-      // await randomGame.placeBet(10, 0, { from: player1 }).should.be.fulfilled;
-      // await randomGame.placeBet(10, 0, { from: player2 }).should.be.fulfilled;
-      // console.log(await randomGame.getAllPlayers());
-      // console.log(await randomGame.playerCount());
-      // console.log(await randomGame.gameId());
-      // await randomGame.finishGame({ from: owner }).should.be.fulfilled;
-      // console.log(await randomGame.getBlanceOfSmartContract());
-    });
-  });
+  // describe("Test Play Game", async () => {
+  //   // it("test play game with many players", async () => {
+  //   //   await randomGame.startGame(10, 10, { from: owner }).should.be.fulfilled;
+  //   //   await randomGame.placeBet(100, 1, { from: player1 }).should.be.fulfilled;
+  //   //   await randomGame.placeBet(100, 0, { from: player2 }).should.be.fulfilled;
+  //   //   console.log(await randomGame.getAllPlayers());
+  //   //   await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //   // });
+  //   it("test play game with many players with 2 start times", async () => {
+  //     // await randomGame.startGame(10, 10, { from: owner, value: tokens("10") })
+  //     //   .should.be.fulfilled;
+  //     // await randomGame.placeBet(10, 1, { from: player1 }).should.be.fulfilled;
+  //     // console.log(await randomGame.getAllPlayers());
+  //     // console.log(await randomGame.totalSupply());
+  //     // console.log(await randomGame.getBalance());
+  //     // await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //     // await randomGame.startGame(10, 10, { from: owner }).should.be.fulfilled;
+  //     // await randomGame.placeBet(10, 0, { from: player1 }).should.be.fulfilled;
+  //     // await randomGame.placeBet(10, 0, { from: player2 }).should.be.fulfilled;
+  //     // console.log(await randomGame.getAllPlayers());
+  //     // console.log(await randomGame.playerCount());
+  //     // console.log(await randomGame.gameId());
+  //     // await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  //     // console.log(await randomGame.getBlanceOfSmartContract());
+  //   });
+  // });
 
   // describe("Test Game flow", async () => {
   //   it("should play game", async () => {

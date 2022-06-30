@@ -13,6 +13,6 @@ async function deployInRinkeByTestNet(deployer) {
 }
 
 async function deployInDevelopmentNetwork(deployer, accounts) {
-  // await deployer.deploy(RandomGame);
-  // const random = await RandomGame.deployed();
+  await deployer.deploy(RandomGame);
+  const random = await RandomGame.deployed();
 }
