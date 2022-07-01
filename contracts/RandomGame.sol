@@ -31,22 +31,15 @@ contract RandomGame is Ownable {
     //====================== Game States ======================
 
     uint256 public playerCount = 0;
-    uint256 public constant maxPlayerCount = 100;
+    uint256 public constant maxPlayerCount = 10;
+    uint256 public maxPlayerStake = 1 ether; //0.01
+    uint256 public minPlayerStake = 0.1 ether; //0.001
     Player[] public players;
 
     bool public isEnded = true;
     uint256 public endTime = 0;
     uint256 private randNonce = 0;
     uint256 public gameId = 0;
-
-    //====================== Fallback and Receive Functions ======================
-    fallback() external payable {
-        // do nothing here
-    }
-
-    receive() external payable {
-        // do nothing here
-    }
 
     // ====================== Modifier =========================
     // Modifiers and requires are conditions that must be met before a function is executed.
@@ -59,36 +52,38 @@ contract RandomGame is Ownable {
     //      End Game condition has enough money to pay for the game
 
     modifier canPlaceBet() {
-        //check player has enough money to bet && money is greater than 0.5 ether
-        // require(msg.value > 0.5 gwei, "Player must have enough money to bet");
-        // require(msg.value == stake, "Player must have enough money to bet");
-
-        //check max player
-
-        //check player is not in game
-
-        //check max and min stake
-
+        //check game has end
         require(block.timestamp <= endTime, "The game has ended");
         require(isEnded == false, "The game has ended");
+        //check max and min stake
+        require(msg.value >= minPlayerStake, "Your stake is too low");
+        require(msg.value <= maxPlayerStake, "Your stake is too high");
+        //check max player
+        require(playerCount < maxPlayerCount, "Game session is full");
+        //check player is not in game
+        for (uint256 i = 0; i < playerCount; i++) {
+            require(
+                players[i].addr != msg.sender,
+                "Player already placed bet!"
+            );
+        }
         _;
     }
 
     modifier canStartGame() {
         //check the owner has enough money to start the game
-        // require(
-        //     // msg.value >= (maxPlayerCount + 1) * 0.5 ether,
-        //     msg.value >= 10 gwei,
-        //     "The owner has not enough money to start the game"
-        // );
-        require(block.timestamp >= endTime, "The game has not ended");
-        require(isEnded == true, "Game   has not already ended");
+        require(
+            msg.value >= (maxPlayerCount * maxPlayerStake * 19) / 10,
+            "You don't have enough money to start the game"
+        );
+        require(block.timestamp >= endTime, "Game session has not ended");
+        require(isEnded == true, "Game session has not ended");
         _;
     }
 
     modifier canFinishGame() {
-        require(block.timestamp >= endTime, "The game has not ended");
-        require(isEnded == false, "Game has already ended");
+        // require(block.timestamp <= endTime, "Game session has not started");
+        require(isEnded == false, "Game session has not started");
         _;
     }
 
@@ -122,15 +117,11 @@ contract RandomGame is Ownable {
         playerCount = 0;
         randNonce = _random;
         gameId++;
-<<<<<<< HEAD
-=======
-
->>>>>>> d1325a72aaa75925bfaafef780dcca10d415d507
         delete players;
         emit StartGameEvent(gameId, block.timestamp, endTime);
     }
 
-    function finishGame() public onlyOwner {
+    function finishGame() public onlyOwner canFinishGame {
         isEnded = true;
         endTime = block.timestamp;
 

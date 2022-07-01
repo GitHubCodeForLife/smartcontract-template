@@ -3,9 +3,10 @@ import "./App.css";
 import Navbar from "./Navbar";
 
 import web3 from "../utils/web3";
-import RandomGameContract from "../utils/RandomGameContract";
+import { PlayerGameContract as RandomGameContract } from "../utils/RandomGameContract";
 import CountDownTime from "./CountDownTime";
 
+//let RandomGameContract;
 function Player() {
   const [account, setAccount] = useState("");
   const [diceNumber, setDiceNumber] = useState("");
@@ -16,6 +17,9 @@ function Player() {
   //=================State functions =====================
   useEffect(() => {
     loadAccountFromMetaMask();
+    // RandomGameContract = loadContracts();
+    console.log("random game contract");
+    console.log({ RandomGameContract });
     registerEvent();
   }, []);
 
@@ -86,7 +90,7 @@ function Player() {
       await RandomGameContract.methods.placeBet(eth, parseInt(status)).send({
         from: account,
         value: eth,
-        gas: "1000000",
+        //gas: "1000000",
       });
     } catch (error) {
       console.log({ error });
