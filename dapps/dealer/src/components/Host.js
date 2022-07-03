@@ -7,8 +7,6 @@ import web3 from "../utils/web3";
 import { HostGameContract as RandomGameContract } from "../utils/RandomGameContract";
 import CountDownTime from "./CountDownTime";
 
-// let RandomGameContract;
-
 function Host() {
   const [time, setTime] = useState(20);
   const [countTime, setCountTime] = useState(0);
@@ -16,37 +14,70 @@ function Host() {
 
   //=================State functions =====================
   useEffect(() => {
-    loadAccountFromMetaMask();
-    registerEvent();
+    const setUp = async () => {
+      const account = await loadAccountFromMetaMask();
+      registerEvent(account);
+    };
+    setUp();
   }, []);
 
   //=================Event functions =====================
-  async function registerEvent() {
+  function registerEvent(account) {
     try {
       // register event listener
       RandomGameContract.events
         .StartGameEvent({
           fromBlock: 0,
-          toBlock: "latest",
         })
         .on("data", (event) => {
           console.log(event);
           const timeStart = event.returnValues.timeStart;
           const timeEnd = event.returnValues.timeEnd;
-          const countTime = timeEnd - timeStart;
           const currentTimeInSecond = new Date().getTime() / 1000;
+          const countTime = timeEnd - timeStart;
           if (currentTimeInSecond < timeEnd) {
             setCountTime(0);
             setCountTime(countTime);
-            // setTimeout(finishGame, countTime * 1000);
+            setTimeout(() => finishGame(account), countTime * 1000);
           }
+        });
+      RandomGameContract.events
+        .EndGameEvent({
+          fromBlock: 0,
+        })
+        .on("data", (event) => {
+          setCountTime(0);
+          console.log(event);
+        })
+        .on("error", console.error);
+
+      RandomGameContract.events
+        .PlaceBetEvent({
+          fromBlock: 0,
+        })
+        .on("data", (event) => {
+          console.log(event);
         })
         .on("error", console.error);
     } catch (error) {
       console.log(error);
     }
   }
-
+  async function finishGame(account) {
+    console.log("Finish game");
+    try {
+      await RandomGameContract.methods.finishGame().send({
+        from: account,
+        gas: "1000000",
+      });
+    } catch (error) {
+      if (error.message && error.message.split("'")[1]) {
+        const err = JSON.parse(error.message.split("'")[1]);
+        console.log("error: ", err.value.data.message);
+      }
+      console.log({ error });
+    }
+  }
   async function startGame() {
     console.log("Start game");
     console.log({ randomToken: RandomGameContract });
@@ -65,29 +96,12 @@ function Host() {
     }
   }
 
-  async function finishGame() {
-    console.log("Finish game");
-    console.log({ randomToken: RandomGameContract });
-    try {
-      await RandomGameContract.methods.finishGame().send({
-        from: account,
-        gas: "1000000",
-      });
-    } catch (error) {
-      if (error.message && error.message.split("'")[1]) {
-        const err = JSON.parse(error.message.split("'")[1]);
-        console.log("error: ", err.value.data.message);
-      }
-      console.log({ error });
-    }
-  }
-
   //=================Helper functions =====================
 
   async function loadAccountFromMetaMask() {
     const accounts = await web3.eth.getAccounts();
     setAccount(accounts[0]);
-    console.log({ accounts });
+    return accounts[0];
   }
 
   return (
@@ -109,7 +123,17 @@ function Host() {
               <br></br>
               <button onClick={startGame}> Start Game</button>
               <br></br>
-              <button onClick={finishGame}> Finish Game</button>
+              <button
+                onClick={() =>
+                  RandomGameContract.methods.finishGame().send({
+                    from: account,
+                    gas: "1000000",
+                  })
+                }
+              >
+                {" "}
+                Finish Game
+              </button>
               <br></br>
               {/* Input for stake number */}
               <input

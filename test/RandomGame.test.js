@@ -33,23 +33,23 @@ contract("RandomGame", async ([owner, player1, player2, player3, player4]) => {
   //     await randomGame.finishGame({ from: owner }).should.be.fulfilled;
   //   });
   // });
-  describe("Can place bet", async () => {
-    it("test start game with 19 eth", async () => {
-      // await randomGame.startGame(10, 10, { from: owner, value: tokens("19") })
-      //   .should.be.fulfilled;
-      // await randomGame.placeBet(tokens("1"), 1, {
-      //   from: player2,
-      //   value: tokens("1"),
-      // }).should.be.fulfilled;
-      // await randomGame.placeBet(tokens("1"), 0, {
-      //   from: player3,
-      //   value: tokens("1"),
-      // }).should.be.fulfilled;
-      // await randomGame.placeBet(tokens("1"), 0, {
-      //   from: player4,
-      //   value: tokens("1"),
-      // }).should.be.fulfilled;
-      await randomGame.finishGame({ from: owner }).should.be.fulfilled;
+  describe("", async () => {
+    it("Can start and finish game", async () => {
+      await randomGame.startGame(10, { from: owner, value: tokens("1.9") })
+        .should.be.fulfilled;
+      await randomGame.finishGame(10, { from: owner }).should.be.fulfilled;
+    });
+    it("Can finish game before starting", async () => {
+      await randomGame.finishGame(10, { from: owner }).should.be.fulfilled;
+    });
+    it("Can place bet after finishing game", async () => {
+      await randomGame.startGame(10, { from: owner, value: tokens("1.9") })
+        .should.be.fulfilled;
+      await randomGame.finishGame(10, { from: owner }).should.be.fulfilled;
+      await randomGame.placeBet(tokens("1"), 1, {
+        from: player1,
+        value: tokens("1"),
+      }).should.be.fulfilled;
     });
   });
   // describe("Test Finish Game", async () => {

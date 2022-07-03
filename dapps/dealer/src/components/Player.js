@@ -3,7 +3,10 @@ import "./App.css";
 import Navbar from "./Navbar";
 
 import web3 from "../utils/web3";
-import { PlayerGameContract as RandomGameContract } from "../utils/RandomGameContract";
+import {
+  PlayerGameContract as RandomGameContract,
+  PlayerGameSocket,
+} from "../utils/RandomGameContract";
 import CountDownTime from "./CountDownTime";
 
 //let RandomGameContract;
@@ -17,9 +20,6 @@ function Player() {
   //=================State functions =====================
   useEffect(() => {
     loadAccountFromMetaMask();
-    // RandomGameContract = loadContracts();
-    console.log("random game contract");
-    console.log({ RandomGameContract });
     registerEvent();
   }, []);
 
@@ -27,13 +27,12 @@ function Player() {
     const accounts = await web3.eth.getAccounts();
     setAccount(accounts[0]);
   }
-  async function registerEvent() {
+  function registerEvent() {
     try {
       // register event listener
-      RandomGameContract.events
+      PlayerGameSocket.events
         .StartGameEvent({
           fromBlock: 0,
-          toBlock: "latest",
         })
         .on("data", (event) => {
           console.log(event);
@@ -48,10 +47,9 @@ function Player() {
         })
         .on("error", console.error);
 
-      RandomGameContract.events
+      PlayerGameSocket.events
         .EndGameEvent({
           fromBlock: 0,
-          toBlock: "latest",
         })
         .on("data", (event) => {
           setCountTime(0);
@@ -64,10 +62,9 @@ function Player() {
         })
         .on("error", console.error);
 
-      RandomGameContract.events
+      PlayerGameSocket.events
         .PlaceBetEvent({
           fromBlock: 0,
-          toBlock: "latest",
         })
         .on("data", (event) => {
           console.log(event);
@@ -87,12 +84,19 @@ function Player() {
 
     try {
       const eth = web3.utils.toWei(stake.toString(), "ether");
+      // const gasEstimation = await RandomGameContract.methods
+      //   .placeBet(eth, parseInt(status))
+      //   .estimateGas({ from: account, value: eth });
       await RandomGameContract.methods.placeBet(eth, parseInt(status)).send({
         from: account,
         value: eth,
-        //gas: "1000000",
+        //gas: gasEstimation,
       });
     } catch (error) {
+      if (error.message && error.message.split("'")[1]) {
+        const err = JSON.parse(error.message.split("'")[1]);
+        console.log("error: ", err.value.data.message);
+      }
       console.log({ error });
     }
   }
