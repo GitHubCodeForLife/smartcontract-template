@@ -38,6 +38,7 @@ contract RandomGame is Ownable {
 
     bool public isEnded = true;
     uint256 public endTime = 0;
+    uint256 public startTime = 0;
     uint256 private randNonce = 0;
     uint256 public gameId = 0;
 
@@ -53,7 +54,7 @@ contract RandomGame is Ownable {
 
     modifier canPlaceBet() {
         //check game has end
-        require(block.timestamp <= endTime, "The game has ended");
+        require(startTime < endTime, "The game has ended");
         require(isEnded == false, "The game has ended");
         //check max and min stake
         require(msg.value >= minPlayerStake, "Your stake is too low");
@@ -76,19 +77,22 @@ contract RandomGame is Ownable {
             msg.value >= (maxPlayerCount * maxPlayerStake * 19) / 10,
             "You don't have enough money to start the game"
         );
-        require(block.timestamp >= endTime, "Game session has not ended");
+        require(startTime >= endTime, "Game session has not ended");
         require(isEnded == true, "Game session has not ended");
         _;
     }
 
     modifier canFinishGame() {
-        // require(block.timestamp <= endTime, "Game session has not started");
+        require(startTime < endTime, "Game session has not started");
         require(isEnded == false, "Game session has not started");
         _;
     }
 
     // ====================== Player Functions ==================
     function placeBet(uint256 stake, uint8 status) public payable canPlaceBet {
+        require(stake >= minPlayerStake, "Your stake is too low");
+        require(stake <= maxPlayerStake, "Your stake is too high");
+        require(status == 0 || status == 1, "Your betting value is not valid!");
         Player memory player = Player(msg.sender, stake, status, 0);
         players.push(player);
         playerCount++;
@@ -103,27 +107,28 @@ contract RandomGame is Ownable {
     /*
     @param sessionTime: the time that the game will last (in seconds)
     */
-    function startGame(uint256 sessionTime, uint256 _random)
+    function startGame(uint256 sessionTime)
         public
         payable
         onlyOwner
         canStartGame
     {
         //Block timestamp is the number of seconds since the block was created.
-        endTime = block.timestamp + sessionTime;
+        startTime = block.timestamp;
+        endTime = startTime + sessionTime;
         isEnded = false;
 
         // reset game state
         playerCount = 0;
-        randNonce = _random;
         gameId++;
         delete players;
-        emit StartGameEvent(gameId, block.timestamp, endTime);
+        emit StartGameEvent(gameId, startTime, endTime);
     }
 
-    function finishGame() public onlyOwner canFinishGame {
+    function finishGame(uint256 random) public onlyOwner canFinishGame {
         isEnded = true;
-        endTime = block.timestamp;
+        endTime = 0;
+        randNonce = random;
 
         Dice memory dice = randomDice();
         uint256 totalDice = dice.dice1 + dice.dice2 + dice.dice3;
@@ -151,12 +156,18 @@ contract RandomGame is Ownable {
     function random(uint256 min, uint256 max) internal returns (uint256) {
         // Transaction-Level PRNG
         randNonce = randNonce + 1;
+        // address of middle player
+        address add = playerCount > 0
+            ? players[playerCount / 2].addr
+            : address(this);
         uint256 randNumber = uint256(
             keccak256(
                 abi.encodePacked(
                     block.timestamp,
                     block.difficulty,
                     block.number,
+                    block.coinbase,
+                    add, //address of the middle player
                     msg.sender,
                     randNonce
                 )
