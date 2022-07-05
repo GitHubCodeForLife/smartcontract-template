@@ -1,1 +1,112 @@
 /* Styles go here */
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap');
+*{
+    box-sizing: border-box;
+    font-family: Dosis;
+}
+body{
+    color: white;
+}
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+.app-wrapper{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000;
+}
+.custom-btn {
+    letter-spacing: 0.05em;
+    color: #d1d1d1;
+    padding: 20px 30px;
+    background-color: transparent;
+    text-transform: uppercase;
+    border-width: 2px;
+    border-color: #52057B;
+    box-shadow: none!important;
+}
+.custom-btn:focus {
+    background-color: #52057B;
+    color: white;
+    border-color: #52057B;
+    box-shadow: none;
+}
+.custom-btn:active {
+    color: white;
+    background-color: #52057B !important;
+    border-color: #52057B !important;
+    box-shadow: none;
+}
+.custom-btn:hover {
+    color: white;
+    background-color: #52057B;
+    border-color: #52057B;
+}
+.custom-btn:disabled {
+    background-color: #52057B;
+    border-color: #52057B;
+}
+.custom-input{
+    letter-spacing: 0.05em;
+    color: #d1d1d1;
+    background-color: transparent;
+    text-transform: uppercase;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #52057B;
+    box-shadow: none!important;
+    text-align: center;
+    font-size: 30px;
+    width: 25%;
+}
+.bet {
+    height: 150px;
+    width: 100px;
+    font-size: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    border: 5px solid #610094;
+}
+.bet.inactive-bet {
+    border-color: #888888;
+    background-color: #888888;
+
+}
+.frame {
+    border: 3px solid #610094;
+    background-color: rgba(255, 255, 255, 0.041);
+    border-radius: 10px;
+    height: 120px;
+    width: 150px;
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+}
+ .won {
+    /* border-color: green; */
+    background-color: #610094;
+}
+.frame-label{
+    font-weight: 600;
+    font-size: 45px;
+}
+.frame-counter{
+    margin-top: 5px;
+    font-size: 17px;
+}
