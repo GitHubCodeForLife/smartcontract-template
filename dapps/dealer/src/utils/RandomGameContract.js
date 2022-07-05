@@ -3,7 +3,7 @@ import Contract from "web3-eth-contract";
 
 const RandomGame = require("../abis/RandomGame.json");
 
-const RandomGameContractAddress = "0x1AE68baB5E9174ee0Ed9Fb48EA16642542d75524";
+const RandomGameContractAddress = "0x8DFa468B650d5F5b11BD806A5de4D2c7a0117314";
 //const RandomGameContractAddress = "0xa248D6B4D22d76C6F58E4154CC0ffE1f9dd4709C";
 
 export const PlayerGameContract = new web3.eth.Contract(
