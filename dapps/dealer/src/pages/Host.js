@@ -14,16 +14,12 @@ function Host({ account }) {
   const [result, setResult] = useState("none");
   const [tPlayer, setTPlayer] = useState(0);
   const [xPlayer, setXPlayer] = useState(0);
+  const [balance, setBalance] = useState(0);
   let dice = useRef();
 
   useEffect(() => {
     registerEvent(account);
-    // let timer = setTimeout(() => {
-    //   setShowDice(true);
-    // }, 2000);
-    // return () => {
-    //   clearTimeout(timer);
-    // };
+    getBalance();
   }, []);
   useEffect(() => {
     if (dice !== null && diceNumber.length !== 0) {
@@ -33,6 +29,11 @@ function Host({ account }) {
     }
   }, [diceNumber]);
   //=================Event functions =====================
+  async function getBalance() {
+    const wei = await web3.eth.getBalance(account);
+    const b = parseFloat(web3.utils.fromWei(wei));
+    setBalance(b);
+  }
   async function startGame() {
     console.log("Start game");
     console.log({ randomToken: RandomGameContract });
@@ -73,6 +74,7 @@ function Host({ account }) {
         setTPlayer(0);
         setXPlayer(0);
         setResult("none");
+        getBalance();
         console.log(event);
         const timeStart = event.returnValues.timeStart;
         const timeEnd = event.returnValues.timeEnd;
@@ -111,70 +113,75 @@ function Host({ account }) {
     }
   }
   return (
-    <div>
-      <CountDownTime time={countTime} />
-      <div
-        style={{
-          opacity: showDice ? "1" : "0",
-          textAlign: "center",
-        }}
-      >
-        <ReactDice
-          numDice={3}
-          rollDone={() => {
-            setDoneRolling(true);
+    <>
+      <div className="balance">Balance: {balance}</div>
+      <div className="my-auto">
+        <CountDownTime time={countTime} />
+        <div
+          style={{
+            opacity: showDice ? "1" : "0",
+            textAlign: "center",
           }}
-          ref={(r) => (dice = r)}
-          faceColor="#3F0071"
-          dotColor="#ffffff"
-          dieSize="80"
-          disableIndividual={true}
-          defaultRoll={6}
-        />
-      </div>
-
-      <div
-        className="text-center"
-        style={{
-          fontSize: "20px",
-          opacity: result !== "none" && doneRolling ? "1" : "0",
-        }}
-      >
-        Result: {result}
-      </div>
-      <div className="d-flex justify-content-center">
-        <span className="mr-2" style={{ fontSize: "20px" }}>
-          Betting time (seconds):
-        </span>
-        <input
-          disabled={countTime}
-          type="number"
-          placeholder="Enter the time in seconds"
-          className="custom-input"
-          value={time}
-          style={{ fontSize: "20px" }}
-          onChange={(e) => setTime(e.target.value)}
-        />
-      </div>
-      <PlayerCounter
-        tPlayer={tPlayer}
-        xPlayer={xPlayer}
-        result={result}
-        doneRolling={doneRolling}
-      />
-      <div className="d-flex justify-content-center mt-5">
-        <Button
-          className="custom-btn"
-          onClick={() => startGame()}
-          disabled={countTime}
         >
-          Start Game
-        </Button>
-      </div>
-      {/* <Button className="custom-btn" onClick={() => finishGame(account)}>
+          <ReactDice
+            numDice={3}
+            rollDone={() => {
+              setDoneRolling(true);
+              getBalance();
+            }}
+            ref={(r) => (dice = r)}
+            faceColor="#3F0071"
+            dotColor="#ffffff"
+            dieSize="80"
+            disableIndividual={true}
+            defaultRoll={6}
+          />
+        </div>
+
+        <div
+          className="text-center"
+          style={{
+            fontSize: "20px",
+            opacity: result !== "none" && doneRolling ? "1" : "0",
+          }}
+        >
+          Result: {result}
+        </div>
+        <div className="d-flex justify-content-center">
+          <span className="mr-2" style={{ fontSize: "20px" }}>
+            Betting time (seconds):
+          </span>
+          <input
+            disabled={countTime}
+            type="number"
+            placeholder="Enter the time in seconds"
+            className="custom-input"
+            value={time}
+            style={{ fontSize: "20px" }}
+            onChange={(e) => setTime(e.target.value)}
+          />
+        </div>
+
+        <PlayerCounter
+          tPlayer={tPlayer}
+          xPlayer={xPlayer}
+          result={result}
+          doneRolling={doneRolling}
+        />
+        <div className="d-flex justify-content-center mt-5">
+          <Button
+            className="custom-btn"
+            onClick={() => startGame()}
+            disabled={countTime}
+          >
+            Start Game
+          </Button>
+        </div>
+        {/* <Button className="custom-btn" onClick={() => finishGame(account)}>
         Finish
       </Button> */}
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -23,6 +23,7 @@ input[type=number] {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     background-color: #000000;
 }
 .custom-btn {
@@ -109,4 +110,7 @@ input[type=number] {
 .frame-counter{
     margin-top: 5px;
     font-size: 17px;
+}
+.balance {
+    font-size: 25px;
 }
