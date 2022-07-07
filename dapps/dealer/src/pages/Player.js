@@ -17,16 +17,12 @@ function Player({ account }) {
   const [bet, setBet] = useState("1");
   const [countTime, setCountTime] = useState(0);
   const [result, setResult] = useState("none");
+  const [balance, setBalance] = useState(0);
   let dice = useRef();
   //=================State functions =====================
   useEffect(() => {
     registerEvent();
-    // let timer = setTimeout(() => {
-    //   setShowDice(true);
-    // }, 2000);
-    // return () => {
-    //   clearTimeout(timer);
-    // };
+    getBalance();
   }, []);
   useEffect(() => {
     if (dice !== null && diceNumber.length !== 0) {
@@ -35,6 +31,11 @@ function Player({ account }) {
       dice.rollAll(diceNumber);
     }
   }, [diceNumber]);
+  async function getBalance() {
+    const wei = await web3.eth.getBalance(account);
+    const b = parseFloat(web3.utils.fromWei(wei));
+    setBalance(b);
+  }
   function registerEvent() {
     try {
       // register event listener
@@ -79,6 +80,7 @@ function Player({ account }) {
         .PlaceBetEvent()
         .on("data", (event) => {
           console.log(event);
+          getBalance();
           if (event.returnValues.player.addr === account) setIsBetPlaced(true);
         })
         .on("error", console.error);
@@ -112,83 +114,87 @@ function Player({ account }) {
   }
 
   return (
-    <div>
-      <CountDownTime time={countTime} />
-      <div
-        style={{
-          opacity: showDice ? "1" : "0",
-        }}
-      >
-        <ReactDice
-          numDice={3}
-          rollDone={() => {
-            setDoneRolling(true);
-            setIsBetPlaced(false);
-          }}
-          ref={(r) => (dice = r)}
-          faceColor="#3F0071"
-          dotColor="#ffffff"
-          dieSize="80"
-          disableIndividual={true}
-          defaultRoll={6}
-        />
-      </div>
-      <div
-        className="text-center"
-        style={{
-          fontSize: "20px",
-          opacity: result !== "none" && doneRolling ? "1" : "0",
-        }}
-      >
-        You {result}.
-      </div>
-
-      <div className="d-flex justify-content-around  my-4">
+    <>
+      <div className="balance">Balance: {balance}</div>
+      <div className="my-auto">
+        <CountDownTime time={countTime} />
         <div
-          className={bet === "1" ? "bet" : "bet inactive-bet"}
-          onClick={() => {
-            if (!isBetPlaced) setBet("1");
-          }}
-        >
-          T
-        </div>
-        <div
-          className={bet === "0" ? "bet" : "bet inactive-bet"}
-          onClick={() => {
-            if (!isBetPlaced) setBet("0");
-          }}
-        >
-          X
-        </div>
-      </div>
-      <div className="d-flex justify-content-center">
-        <span className="mr-2" style={{ fontSize: "20px" }}>
-          Your stake:
-        </span>
-        <input
-          disabled={isBetPlaced}
-          type="number"
-          placeholder="Enter stake number"
-          className="custom-input"
           style={{
-            width: "50%",
-            fontSize: "20px",
+            opacity: showDice ? "1" : "0",
           }}
-          value={stake}
-          onChange={(e) => setStake(e.target.value)}
-        />
-      </div>
-
-      <div className="d-flex justify-content-center mt-5">
-        <Button
-          className="custom-btn"
-          onClick={placeBet}
-          disabled={isBetPlaced || countTime <= 0}
         >
-          Place bet
-        </Button>
+          <ReactDice
+            numDice={3}
+            rollDone={() => {
+              setDoneRolling(true);
+              setIsBetPlaced(false);
+              getBalance();
+            }}
+            ref={(r) => (dice = r)}
+            faceColor="#3F0071"
+            dotColor="#ffffff"
+            dieSize="80"
+            disableIndividual={true}
+            defaultRoll={6}
+          />
+        </div>
+        <div
+          className="text-center"
+          style={{
+            fontSize: "20px",
+            opacity: result !== "none" && doneRolling ? "1" : "0",
+          }}
+        >
+          You {result}.
+        </div>
+
+        <div className="d-flex justify-content-around  my-4">
+          <div
+            className={bet === "1" ? "bet" : "bet inactive-bet"}
+            onClick={() => {
+              if (!isBetPlaced) setBet("1");
+            }}
+          >
+            TAI
+          </div>
+          <div
+            className={bet === "0" ? "bet" : "bet inactive-bet"}
+            onClick={() => {
+              if (!isBetPlaced) setBet("0");
+            }}
+          >
+            XIU
+          </div>
+        </div>
+        <div className="d-flex justify-content-center">
+          <span className="mr-2" style={{ fontSize: "20px" }}>
+            Your stake:
+          </span>
+          <input
+            disabled={isBetPlaced}
+            type="number"
+            placeholder="Enter stake number"
+            className="custom-input"
+            style={{
+              width: "50%",
+              fontSize: "20px",
+            }}
+            value={stake}
+            onChange={(e) => setStake(e.target.value)}
+          />
+        </div>
+
+        <div className="d-flex justify-content-center mt-5">
+          <Button
+            className="custom-btn"
+            onClick={placeBet}
+            disabled={isBetPlaced || countTime <= 0}
+          >
+            Place bet
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
