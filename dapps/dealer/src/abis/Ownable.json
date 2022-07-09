@@ -79,7 +79,7 @@
   "sourceMap": "264:1633:1:-:0;;;624:58;5:9:-1;2:2;;;27:1;24;17:12;2:2;624:58:1;664:10;656:5;;:18;;;;;;;;;;;;;;;;;;264:1633;;;;;;",
   "deployedSourceMap": "264:1633:1:-:0;;;;5:9:-1;2:2;;;27:1;24;17:12;2:2;264:1633:1;;;;;;;;;;;;;;;;;;;;;;;;;;12:1:-1;9;2:12;1141:124:1;;;:::i;:::-;;288:20;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;1443:111;;;;;;15:2:-1;10:3;7:11;4:2;;;31:1;28;21:12;4:2;1443:111:1;;;;;;;;;;;;;;;;;;;:::i;:::-;;1141:124;829:5;;;;;;;;;;;815:19;;:10;:19;;;807:28;;12:1:-1;9;2:12;807:28:1;1222:5:::1;::::0;::::1;;;;;;;;;1203:25;;;;;;;;;;;;1255:1;1239:5:::0;::::1;:18;;;;;;;;;;;;;;;;;;1141:124::o:0;288:20::-;;;;;;;;;;;;;:::o;1443:111::-;829:5;;;;;;;;;;;815:19;;:10;:19;;;807:28;;12:1:-1;9;2:12;807:28:1;1517:29:::1;1536:9;1517:18;:29::i;:::-;1443:111:::0;:::o;1705:189::-;1801:1;1780:23;;:9;:23;;;;1772:32;;12:1:-1;9;2:12;1772:32:1;1848:9;1820:38;;1841:5;;;;;;;;;;;1820:38;;;;;;;;;;;;1877:9;1869:5;;:17;;;;;;;;;;;;;;;;;;1705:189;:::o",
   "source": "// SPDX-License-Identifier: MIT\r\npragma solidity >=0.4.22 <0.7.0;\r\n\r\n/**\r\n * @title Ownable\r\n * @dev The Ownable contract has an owner address, and provides basic authorization control\r\n * functions, this simplifies the implementation of \"user permissions\".\r\n */\r\ncontract Ownable {\r\n    address public owner;\r\n\r\n    event OwnershipRenounced(address indexed previousOwner);\r\n    event OwnershipTransferred(\r\n        address indexed previousOwner,\r\n        address indexed newOwner\r\n    );\r\n\r\n    /**\r\n     * @dev The Ownable constructor sets the original `owner` of the contract to the sender\r\n     * account.\r\n     */\r\n    constructor() public {\r\n        owner = msg.sender;\r\n    }\r\n\r\n    /**\r\n     * @dev Throws if called by any account other than the owner.\r\n     */\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner);\r\n        _;\r\n    }\r\n\r\n    /**\r\n     * @dev Allows the current owner to relinquish control of the contract.\r\n     * @notice Renouncing to ownership will leave the contract without an owner.\r\n     * It will not be possible to call the functions with the `onlyOwner`\r\n     * modifier anymore.\r\n     */\r\n    function renounceOwnership() public onlyOwner {\r\n        emit OwnershipRenounced(owner);\r\n        owner = address(0);\r\n    }\r\n\r\n    /**\r\n     * @dev Allows the current owner to transfer control of the contract to a newOwner.\r\n     * @param _newOwner The address to transfer ownership to.\r\n     */\r\n    function transferOwnership(address _newOwner) public onlyOwner {\r\n        _transferOwnership(_newOwner);\r\n    }\r\n\r\n    /**\r\n     * @dev Transfers control of the contract to a newOwner.\r\n     * @param _newOwner The address to transfer ownership to.\r\n     */\r\n    function _transferOwnership(address _newOwner) internal {\r\n        require(_newOwner != address(0));\r\n        emit OwnershipTransferred(owner, _newOwner);\r\n        owner = _newOwner;\r\n    }\r\n}\r\n",
-  "sourcePath": "E:\\BaoTien\\Desktop\\smartcontract\\smartcontract-template\\contracts\\Ownable.sol",
+  "sourcePath": "C:\\Users\\ASUS\\Documents\\HK2 - 2022\\new techologies\\smartcontract-template\\contracts\\Ownable.sol",
   "ast": {
     "absolutePath": "project:/contracts/Ownable.sol",
     "exportedSymbols": {
@@ -2492,8 +2492,8 @@
     "version": "0.6.8+commit.0bbfe453.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.4.4",
-  "updatedAt": "2022-07-03T07:38:37.705Z",
+  "schemaVersion": "3.4.7",
+  "updatedAt": "2022-07-09T09:22:22.072Z",
   "devdoc": {
     "details": "The Ownable contract has an owner address, and provides basic authorization control functions, this simplifies the implementation of \"user permissions\".",
     "methods": {

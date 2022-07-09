@@ -5,6 +5,7 @@ import ReactDice from "react-dice-complete";
 import web3 from "../utils/web3";
 import CountDownTime from "../components/CountDownTime";
 import PlayerCounter from "../components/PlayerCounter";
+import Balance from "../components/Balance";
 function Host({ account }) {
   const [diceNumber, setDiceNumber] = useState([]);
   const [showDice, setShowDice] = useState(false);
@@ -114,7 +115,7 @@ function Host({ account }) {
   }
   return (
     <>
-      <div className="balance">Balance: {balance}</div>
+      <Balance account={account} />
       <div className="my-auto">
         <CountDownTime time={countTime} />
         <div
