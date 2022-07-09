@@ -8,6 +8,7 @@ import {
 } from "../utils/RandomGameContract";
 import web3 from "../utils/web3";
 import "react-dice-complete/dist/react-dice-complete.css";
+import Balance from "../components/Balance";
 function Player({ account }) {
   const [diceNumber, setDiceNumber] = useState([]);
   const [showDice, setShowDice] = useState(false);
@@ -22,7 +23,6 @@ function Player({ account }) {
   //=================State functions =====================
   useEffect(() => {
     registerEvent();
-    getBalance();
   }, []);
   useEffect(() => {
     if (dice !== null && diceNumber.length !== 0) {
@@ -80,7 +80,6 @@ function Player({ account }) {
         .PlaceBetEvent()
         .on("data", (event) => {
           console.log(event);
-          getBalance();
           if (event.returnValues.player.addr === account) setIsBetPlaced(true);
         })
         .on("error", console.error);
@@ -115,7 +114,8 @@ function Player({ account }) {
 
   return (
     <>
-      <div className="balance">Balance: {balance}</div>
+      <Balance account={account} />
+
       <div className="my-auto">
         <CountDownTime time={countTime} />
         <div

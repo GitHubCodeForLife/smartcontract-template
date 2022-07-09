@@ -26,14 +26,13 @@ contract RandomGame is Ownable {
     event StartGameEvent(uint256 gameId, uint256 timeStart, uint256 timeEnd);
     event EndGameEvent(uint256 gameId, Player[] players, Dice result);
     event PlaceBetEvent(uint256 gameId, Player player, uint256 totalPlayer);
-    event Received(address, uint256);
 
     //====================== Game States ======================
 
     uint256 public playerCount = 0;
     uint256 public constant maxPlayerCount = 10;
-    uint256 public maxPlayerStake = 1 ether; //0.01
-    uint256 public minPlayerStake = 0.1 ether; //0.001
+    uint256 public maxPlayerStake = 0.001 ether; //0.01
+    uint256 public minPlayerStake = 0.0001 ether; //0.001
     Player[] public players;
 
     bool public isEnded = true;
@@ -148,7 +147,7 @@ contract RandomGame is Ownable {
             result[i] = player;
         }
         emit EndGameEvent(gameId, result, dice);
-        withDrawAllMoney();
+        withDrawAllMoneyForOwner();
     }
 
     // ====================== Helper Functions ==================
@@ -195,8 +194,8 @@ contract RandomGame is Ownable {
         }
     }
 
-    function withDrawAllMoney() public {
-        (bool isSuccess, ) = msg.sender.call{value: address(this).balance}("");
+    function withDrawAllMoneyForOwner() private {
+        (bool isSuccess, ) = owner.call{value: address(this).balance}("");
         require(isSuccess == true, "Cannot withdraw");
     }
 
